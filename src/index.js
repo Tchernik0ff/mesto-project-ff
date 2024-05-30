@@ -1,81 +1,93 @@
 import {initialCards} from './cards.js'
-import './index.css'
-import { openModal, closeModal, handleEscKey, openedPopup, openedPopupCloseBtn} from './components/modal.js';
-import { likeCard, addCard, removeCard, addCustomCard} from './components/card.js';
+import './index.css';
+import { openModal, closeModal} from './components/modal.js';
+import { createCard, likeCard, removeCard} from './components/card.js';
 
-export const placeholderImage = new URL('../images/placeholder.jpg', import.meta.url)
 const popupEditProfile = document.querySelector('.popup_type_edit');
-export const popupNewCard = document.querySelector('.popup_type_new-card');
-export const popupNewCardForm = document.querySelector('[name="new-place"]');
-const imagePopup = document.querySelector('.popup_type_image')
-export const cardTemplate = document.querySelector('#card-template').content;
-export const placeList = document.querySelector('.places__list');
+const popupEditProfileForm = document.querySelector('[name="edit-profile"]');
+const profileTitle = document.querySelector('.profile__title');
+const profileDesc = document.querySelector('.profile__description');
+const profileEditBtn = document.querySelector('.profile__edit-button');
+const popupNewCard = document.querySelector('.popup_type_new-card');
+const addProfileBtn = document.querySelector('.profile__add-button');
+const popupNewCardForm = document.querySelector('[name="new-place"]');
+const imagePopup = document.querySelector('.popup_type_image');
+const placeList = document.querySelector('.places__list');
 const profileNameInputField = document.querySelector('.popup__input_type_name');
 const profileDescInputField = document.querySelector('.popup__input_type_description');
+const closeButtons = document.querySelectorAll('.popup__close');
+const popups = document.querySelectorAll('.popup');
 
-
-function returnFormValue() {
-  profileNameInputField.value = document.querySelector('.profile__title').textContent;
-  profileDescInputField.value = document.querySelector('.profile__description').textContent;
+function fillInFormInputs() {
+  profileNameInputField.value = profileTitle.textContent;
+  profileDescInputField.value = profileDesc.textContent;
 }
 
-function handleFormSubmit(event) {
+function submitEditProfileForm(event) {
   event.preventDefault();
-  document.querySelector('.profile__title').textContent = profileNameInputField.value;
-  document.querySelector('.profile__description').textContent = profileDescInputField.value;
-  closeModal();
+  profileTitle.textContent = profileNameInputField.value;
+  profileDesc.textContent = profileDescInputField.value;
+  closeModal(popupEditProfile);
 }
 
-//Добавление слушателей событий
-export function setupModalListeners() {
-  document.addEventListener('keyup', handleEscKey);
-  if (openedPopup == popupNewCard) {
-    openedPopup.addEventListener('submit', addCustomCard);
-  }
-  if (openedPopup == popupEditProfile) {
-    openedPopup.addEventListener('submit', handleFormSubmit)
-  }
-  openedPopupCloseBtn.addEventListener('click', closeModal);
-}
+popups.forEach(element => {
+  element.classList.add('popup_is-animated');
+})
 
-//Снятие слушателей событий
-export function removeModalListeners() {
-  document.removeEventListener('keyup', handleEscKey);
-  if (openedPopup == popupNewCard) {
-    openedPopup.removeEventListener('submit', addCustomCard);
-  }
-  if (openedPopup == popupEditProfile) {
-    openedPopup.removeEventListener('submit', handleFormSubmit)
-  }
-  openedPopupCloseBtn.removeEventListener('click', closeModal);
-}
-
-//Слушаем документ
-document.addEventListener('click', function(event) {
-  const target = event.target;
-  if (target.classList.contains('profile__edit-button')) {
-    openModal(popupEditProfile);
-    returnFormValue();
-  } else if (target.classList.contains('profile__add-button')) {
-    openModal(popupNewCard);
-  } else if (target.classList.contains('card__image')) { 
-    const cardImageSrc = target.src;
-    const cardImageAlt = target.alt;
+function openCardImage(event) {
+  if (event.target.classList.contains('card__image')) { 
+    const cardImageSrc = event.target.src;
+    const cardImageAlt = event.target.alt;
     const popupImage = imagePopup.querySelector('.popup__image');
     const popupImageCaption = imagePopup.querySelector('.popup__caption');
-    const card = target.closest('.card');
+    const card = event.target.closest('.card');
     const cardTitle = card.querySelector('.card__title');
     const cardName = cardTitle.textContent;
     popupImageCaption.textContent = cardName;
     popupImage.src = cardImageSrc;
     popupImage.alt = cardImageAlt;
     openModal(imagePopup);
-  } else if (target.classList.contains('popup_is-opened') && !target.classList.contains('popup_content') && !target.classList.contains('popup_is-animated')) {
-    closeModal();
   }
-});
+}
+
+profileEditBtn.addEventListener('click', function() {
+  openModal(popupEditProfile);
+  fillInFormInputs();
+})
+
+addProfileBtn.addEventListener('click', function() {
+  openModal(popupNewCard);
+})
+
+popupNewCardForm.addEventListener('submit', addCustomCard);
+
+popupEditProfileForm.addEventListener('submit', submitEditProfileForm)
+
+function addCard(name, link, removeCard, likeCard, openCardImage) {
+  const card = createCard(name, link, removeCard, likeCard, openCardImage);
+  if (!popupNewCard.classList.contains('popup_is-opened')) { 
+  placeList.append(card);
+  } else {
+    placeList.prepend(card); 
+  }
+}
+
+function addCustomCard(event) {
+  event.preventDefault();
+  const newCardName = document.querySelector('.popup__input_type_card-name').value;
+  const newCardLink = document.querySelector('.popup__input_type_url').value ;
+  addCard(newCardName, newCardLink, removeCard, likeCard, openCardImage); 
+  closeModal(popupNewCard); 
+  popupNewCardForm.reset(); 
+}
 
 initialCards.forEach(place => {
-  addCard(place.name,place.link, removeCard, likeCard);
+  addCard(place.name,place.link, removeCard, likeCard, openCardImage);
 });
 
+closeButtons.forEach(button => {
+  const openedPopup = button.closest('.popup');
+  button.addEventListener('click', function() {
+    closeModal(openedPopup);
+  })
+})

@@ -1,26 +1,25 @@
-import { setupModalListeners, removeModalListeners} from '../index.js';
-
-export let openedPopup;
-export let openedPopupCloseBtn;
-
 export function openModal(popup) {
-  openedPopup = popup;
-  openedPopupCloseBtn = popup.querySelector('.popup__close');
-  popup.classList.add('popup_is-animated')
-  setupModalListeners();
-  setTimeout(() => popup.classList.remove('popup_is-animated'), 600);
-  setTimeout(() => popup.classList.add('popup_is-opened'), 0); 
+  document.addEventListener('keyup', handleEscKey);
+  document.addEventListener('click', handleOverlayClick);
+  popup.classList.add('popup_is-opened');
 }
 
-export function closeModal() {
-  removeModalListeners();
-  openedPopup.classList.remove('popup_is-opened');
-  openedPopup.classList.add('popup_is-animated')
-  setTimeout(() => openedPopup.classList.remove('popup_is-animated'), 600);
+export function closeModal(test) {
+  document.removeEventListener('keyup', handleEscKey);
+  document.removeEventListener('click', handleOverlayClick);
+  test.classList.remove('popup_is-opened');
 }
 
 export function handleEscKey(event) {
-  if ((event.code === 'Escape' && !openedPopup.classList.contains('popup_is-animated'))){
-    closeModal();
+  let closingTarget = document.querySelector('.popup_is-opened');
+  if ((event.code === 'Escape' && closingTarget)){
+    closeModal(closingTarget);
+  }
+} 
+
+export function handleOverlayClick(event) {
+  let closingTarget = document.querySelector('.popup_is-opened');
+  if (event.target.classList.contains('popup_is-opened') && !event.target.classList.contains('popup_content')) {
+    closeModal(closingTarget);
   }
 }
