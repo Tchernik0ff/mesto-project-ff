@@ -1,15 +1,16 @@
+const cardTemplate = document.querySelector('#card-template').content;
+
 function getCardTemplate() {
-  const cardTemplate = document.querySelector('#card-template').content;
   const template = cardTemplate.cloneNode(true);
+  return template;
+}
+
+export function createCard(name, link, removeCard, likeCard, imageOpeningHandler) {
+  const template = getCardTemplate();
   const removeBtn = template.querySelector('.card__delete-button');
   const cardImage = template.querySelector('.card__image');
   const cardTitle = template.querySelector('.card__title');
   const likeButton = template.querySelector('.card__like-button');
-  return {template, removeBtn, cardImage, cardTitle, likeButton};
-}
-
-export function createCard(name, link, removeCard, likeCard, imageOpeningHandler) {
-  const {template, removeBtn, cardImage, cardTitle, likeButton} = getCardTemplate();
   cardImage.src = link;
   cardImage.alt = name;
   cardImage.onerror = imageErrorHandler;

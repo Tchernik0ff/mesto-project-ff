@@ -12,6 +12,8 @@ const popupNewCard = document.querySelector('.popup_type_new-card');
 const addProfileBtn = document.querySelector('.profile__add-button');
 const popupNewCardForm = document.querySelector('[name="new-place"]');
 const imagePopup = document.querySelector('.popup_type_image');
+const popupImage = imagePopup.querySelector('.popup__image');
+const popupImageCaption = imagePopup.querySelector('.popup__caption');
 const placeList = document.querySelector('.places__list');
 const profileNameInputField = document.querySelector('.popup__input_type_name');
 const profileDescInputField = document.querySelector('.popup__input_type_description');
@@ -38,8 +40,6 @@ function openCardImage(event) {
   if (event.target.classList.contains('card__image')) { 
     const cardImageSrc = event.target.src;
     const cardImageAlt = event.target.alt;
-    const popupImage = imagePopup.querySelector('.popup__image');
-    const popupImageCaption = imagePopup.querySelector('.popup__caption');
     const card = event.target.closest('.card');
     const cardTitle = card.querySelector('.card__title');
     const cardName = cardTitle.textContent;

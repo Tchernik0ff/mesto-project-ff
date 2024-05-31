@@ -11,14 +11,14 @@ export function closeModal(test) {
 }
 
 export function handleEscKey(event) {
-  let closingTarget = document.querySelector('.popup_is-opened');
+  const closingTarget = document.querySelector('.popup_is-opened');
   if ((event.code === 'Escape' && closingTarget)){
     closeModal(closingTarget);
   }
 } 
 
 export function handleOverlayClick(event) {
-  let closingTarget = document.querySelector('.popup_is-opened');
+  const closingTarget = document.querySelector('.popup_is-opened');
   if (event.target.classList.contains('popup_is-opened') && !event.target.classList.contains('popup_content')) {
     closeModal(closingTarget);
   }
