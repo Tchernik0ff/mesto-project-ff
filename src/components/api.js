@@ -8,31 +8,33 @@ const config = {
 }
 
 // Получение данных пользователя
-export function getInfo(profileTitle, profileDesc, profileAvatar) {
+export function getInfo() {
   return fetch(`${config.baseUrl}/users/me `, {
   headers: config.headers
 })
-  .then(res => res.json())
-  .then(data => {
-    profileTitle.textContent = data.name;
-    profileDesc.textContent = data.about;
-    profileAvatar.style.backgroundImage = `url(${data.avatar})`;
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+  return Promise.reject(`Ошибка: ${response.status}`);
   })
-  .catch(error => {
-    console.error('Ошибка получения данных:', error);
-  });
 };
 
-
-
-export const getCardsData = fetch(`${config.baseUrl}/cards `, {
+export function getCardsData() {
+  return fetch(`${config.baseUrl}/cards `, {
   headers: config.headers
-});
+})
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(`Ошибка: ${response.status}`);
+  })
+};
 
 // Обновление данных пользователя
-export function updateInfo(profileName, profileAbout, updateButton, callback) {
-  updateButton.textContent = 'Сохранение...';
-  fetch(`${config.baseUrl}/users/me`, {
+export function updateInfo(profileName, profileAbout) {
+  return fetch(`${config.baseUrl}/users/me`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
@@ -46,19 +48,11 @@ export function updateInfo(profileName, profileAbout, updateButton, callback) {
     }
     return Promise.reject(`Ошибка: ${response.status}`);
   })
-  .then(data => {
-    updateButton.textContent = 'Сохранить';
-    callback();
-  })
-  .catch(error => {
-    console.error('Ошибка обновления данных:', error);
-  });
 };
 
 // Обновление аватара
-export function updateAvatar(profileAvatar, profileImgElement, updateButton, callback) {
-  updateButton.textContent = 'Сохранение...';
-  fetch(`${config.baseUrl}/users/me/avatar`, {
+export function updateAvatar(profileAvatar) {
+  return fetch(`${config.baseUrl}/users/me/avatar`, {
     method: 'PATCH',
     headers: config.headers,
     body: JSON.stringify({
@@ -70,16 +64,6 @@ export function updateAvatar(profileAvatar, profileImgElement, updateButton, cal
       return response.json();
     }
     return Promise.reject(`Ошибка: ${response.status}`);
-  })
-  .then(data => {
-    // Обновляем изображение в разметке
-    profileImgElement.style.backgroundImage = `url(${data.avatar})`;
-    updateButton.textContent = 'Сохранить';
-    callback();
-  })
-  .catch(error => {
-    updateButton.textContent = 'Сохраненить'
-    console.error('Ошибка обновления аватара:', error);
   })
 };
 
@@ -93,7 +77,12 @@ export function createCardOnServer(name, link) {
       link: link
     })
   })
-  .then(response => response.json());
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(`Ошибка: ${response.status}`);
+  });
 };
 
 // Удаление карточки с сервера
@@ -102,7 +91,12 @@ export function deleteCardFromServer(cardId) {
     method: 'DELETE',
     headers: config.headers
   })
-    .then(response => response.json());
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    return Promise.reject(`Ошибка: ${response.status}`);
+  });
 };
 
 // Лайк карточки

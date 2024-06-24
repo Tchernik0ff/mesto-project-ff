@@ -1,7 +1,8 @@
 import './index.css';
+import { validationConfig } from './components/validationConfig.js';
 import { openModal, closeModal} from './components/modal.js';
 import { createCard, likeCard, removeCard} from './components/card.js';
-import { enableValidation, clearValidation, validationConfig } from './components/validation.js';
+import { enableValidation, clearValidation} from './components/validation.js';
 import { getInfo, updateInfo, updateAvatar, createCardOnServer, getCardsData} from './components/api.js';
 
 const popupEditProfile = document.querySelector('.popup_type_edit');
@@ -27,21 +28,19 @@ const profileNameInputField = document.querySelector('.popup__input_type_name');
 const profileDescInputField = document.querySelector('.popup__input_type_description');
 const closeButtons = document.querySelectorAll('.popup__close');
 const popups = document.querySelectorAll('.popup');
+let userId;
 
-getInfo(profileTitle, profileDesc, profileAvatar);
 
-Promise.all([getCardsData])
-  .then(responses => {
-    return Promise.all(responses.map(response => {
-      return response.json();
-    }));
-  })
-  .then(data => {
-    const cardsData = data[0]; // данные карточек
-    cardsData.forEach(card => {
-      addCard(card.name,card.link, removeCard, likeCard, openCardImage, card.likes, card.owner._id, card._id);
+
+Promise.all([getInfo(), getCardsData()])
+  .then(([userInfo, cards]) => {
+    userId = userInfo._id;
+    profileTitle.textContent = userInfo.name;
+    profileDesc.textContent = userInfo.about;
+    profileAvatar.style.backgroundImage = `url(${userInfo.avatar})`;
+    cards.forEach(cardData => {
+      addCard(removeCard, likeCard, openCardImage, cardData, userId);
     });
-
   })
   .catch(error => {
     console.error('Произошла ошибка при загрузке данных:', error);
@@ -56,19 +55,36 @@ function fillInFormInputs() {
 
 function submitEditProfileForm(event) {
   event.preventDefault();
-  updateInfo(profileNameInputField.value, profileDescInputField.value, editProfileSubmitBtn, () => {
-    profileTitle.textContent = profileNameInputField.value;
-    profileDesc.textContent = profileDescInputField.value;
+  editProfileSubmitBtn.textContent = 'Сохранение...'
+  updateInfo(profileNameInputField.value, profileDescInputField.value)
+  .then(data => {
+    profileTitle.textContent = data.name;
+    profileDesc.textContent = data.about;
     closeModal(popupEditProfile);
+  })
+  .catch(error => {
+    console.error('Ошибка обновления данных:', error);
+  })
+  .finally(() => {
+    editProfileSubmitBtn.textContent = 'Сохранить';
   });
-}
+};
 
 function submitAvatarForm(event) {
   event.preventDefault();
-  updateAvatar(popupAvatarFormField.value, profileAvatar, editAvatarSubmitBtn, () => {
-   closeModal(popupAvatar); 
-  });
-}
+  editAvatarSubmitBtn.textContent = 'Сохранение...';
+  updateAvatar(popupAvatarFormField.value)
+  .then(data => {
+    profileAvatar.style.backgroundImage = `url(${data.avatar})`;
+    closeModal(popupAvatar);
+  })
+  .catch(error => {
+    console.error('Ошибка обновления аватара:', error);
+  })
+  .finally(() => {
+    editAvatarSubmitBtn.textContent = 'Сохранить';
+  })
+};
 
 popups.forEach(element => {
   element.classList.add('popup_is-animated');
@@ -110,8 +126,8 @@ popupEditProfileForm.addEventListener('submit', submitEditProfileForm);
 
 popupAvatarForm.addEventListener('submit', submitAvatarForm);
 
-function addCard(name, link, removeCard, likeCard, openCardImage, likeArray, ownerId, cardId) {
-  const card = createCard(name, link, removeCard, likeCard, openCardImage, likeArray, ownerId, cardId);
+function addCard(removeCard, likeCard, openCardImage, cardData, userId) {
+  const card = createCard(removeCard, likeCard, openCardImage, cardData, userId);
   if (!popupNewCard.classList.contains('popup_is-opened')) { 
   placeList.append(card);
   } else {
@@ -121,23 +137,22 @@ function addCard(name, link, removeCard, likeCard, openCardImage, likeArray, own
 
 function addCustomCard(event) {
   event.preventDefault();
-  newCardSubmitBtn.textContent = 'Сохранить...';
+  newCardSubmitBtn.textContent = 'Сохранение...';
   const newCardName = document.querySelector('.popup__input_type_card-name').value;
   const newCardLink = document.querySelector('.popup__input_type_url').value;
   createCardOnServer(newCardName, newCardLink)
     .then(data => {
-      const likeArray = data.likes;
-      const ownerId = data.owner._id;
-      const cardId = data._id;
-      addCard(newCardName, newCardLink, removeCard, likeCard, openCardImage, likeArray, ownerId, cardId);
+      addCard(removeCard, likeCard, openCardImage, data, userId);
       closeModal(popupNewCard);
       popupNewCardForm.reset();
       clearValidation(popupNewCardForm, validationConfig);
-      newCardSubmitBtn.textContent = 'Сохранить';
     })
     .catch(error => {
       console.log('Не удалось добавить карточку на сервер', error);
-    });
+    })
+    .finally(() => {
+      newCardSubmitBtn.textContent = 'Сохранить';
+    })
 }
 
 closeButtons.forEach(button => {
