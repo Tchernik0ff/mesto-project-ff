@@ -30,8 +30,6 @@ const closeButtons = document.querySelectorAll('.popup__close');
 const popups = document.querySelectorAll('.popup');
 let userId;
 
-
-
 Promise.all([getInfo(), getCardsData()])
   .then(([userInfo, cards]) => {
     userId = userInfo._id;
