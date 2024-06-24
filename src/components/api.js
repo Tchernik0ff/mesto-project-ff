@@ -7,29 +7,27 @@ const config = {
   }
 }
 
+// Обработка ответа от сервера
+function handleResponse(response) {
+  if (response.ok) {
+    return response.json();
+  }
+  return Promise.reject(`Ошибка: ${response.status}`);
+}
+
 // Получение данных пользователя
 export function getInfo() {
   return fetch(`${config.baseUrl}/users/me `, {
   headers: config.headers
 })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-  return Promise.reject(`Ошибка: ${response.status}`);
-  })
+  .then(response => handleResponse(response))
 };
 
 export function getCardsData() {
   return fetch(`${config.baseUrl}/cards `, {
   headers: config.headers
 })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  })
+  .then(response => handleResponse(response))
 };
 
 // Обновление данных пользователя
@@ -42,12 +40,7 @@ export function updateInfo(profileName, profileAbout) {
       about: profileAbout
     })
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  })
+  .then(response => handleResponse(response))
 };
 
 // Обновление аватара
@@ -59,12 +52,7 @@ export function updateAvatar(profileAvatar) {
       avatar: profileAvatar
     })
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  })
+  .then(response => handleResponse(response))
 };
 
 // Добавление карточки на сервер
@@ -77,12 +65,7 @@ export function createCardOnServer(name, link) {
       link: link
     })
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  });
+  .then(response => handleResponse(response))
 };
 
 // Удаление карточки с сервера
@@ -91,12 +74,7 @@ export function deleteCardFromServer(cardId) {
     method: 'DELETE',
     headers: config.headers
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  });
+  .then(response => handleResponse(response))
 };
 
 // Лайк карточки
@@ -105,12 +83,7 @@ export function cardLikeApi(cardId) {
     method: 'PUT',
     headers: config.headers
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  });
+  .then(response => handleResponse(response))
 };
 
 // Дизлайк карточки
@@ -119,10 +92,5 @@ export function cardDislikeApi(cardId) {
     method: 'DELETE',
     headers: config.headers
   })
-  .then(response => {
-    if (response.ok) {
-      return response.json();
-    }
-    return Promise.reject(`Ошибка: ${response.status}`);
-  });
+  .then(response => handleResponse(response))
 };
